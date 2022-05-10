@@ -1,0 +1,88 @@
+﻿@model TimeLine.Models.ViewModels.DeviceTimeLineViewModel
+
+@{
+    ViewData["Title"] = "Entities TimeLines";
+}
+
+<div class="text-center">
+    <h6 class="display-4">TimeLines</h6>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load("current", { packages: ["timeline"] });
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var array = JSON.parse(@Html.Raw(Json.Serialize(@Model.SerializedData)));
+        var container = document.getElementById('example5.1');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn({ type: 'string', id: 'Device' });
+        dataTable.addColumn({ type: 'string', id: 'Status' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
+        const rows = [];
+        for (var i = 0; i < array.length; i++) {
+            var startDate = new Date(array[i].StartDateString);
+            var endDate = new Date(array[i].EndDateString);
+            var row = [array[i].SerialNumber, array[i].Status, startDate, endDate];
+            rows.push(row);
+        }
+        dataTable.addRows(rows);
+
+        //var options = {
+        //    timeline: { colorByRowLabel: true }
+        //};
+
+        //chart.draw(dataTable, options);
+        chart.draw(dataTable);
+    }
+</script>
+
+<div id="wrapper">
+    <div id="example5.1" style="height:auto;"></div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceTimeLine.First().SerialNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceTimeLine.First().Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceTimeLine.First().StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceTimeLine.First().EndDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.DeviceTimeLine)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SerialNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                    @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                    @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
