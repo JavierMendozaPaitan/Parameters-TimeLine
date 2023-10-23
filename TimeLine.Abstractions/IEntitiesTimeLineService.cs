@@ -10,6 +10,6 @@ namespace TimeLine.Abstractions
     public interface IEntitiesTimeLineService
     {
         Func<DeviceTimeLineViewModel> GetDeviceTimeLine { get; }
-
+        Action<DeviceViewModel> CreateDevice { get; }
     }
 }

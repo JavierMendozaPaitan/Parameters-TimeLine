@@ -22,5 +22,6 @@ namespace TimeLine.Services
             _deviceTimeLine = deviceTimeLine;
         }
         public Func<DeviceTimeLineViewModel> GetDeviceTimeLine => _deviceTimeLine.GetDeviceTimeLine;
-    }
+		public Action<DeviceViewModel> CreateDevice => _deviceTimeLine.CreateDevice;
+	}
 }

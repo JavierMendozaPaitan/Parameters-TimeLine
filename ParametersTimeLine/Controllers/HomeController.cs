@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DataProvider.Models.Contoso;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,24 @@ namespace TimeLineWebApp.Controllers
                 _logger.LogError($"Problems with entities timelines: {ex.Message}", ex.StackTrace);
                 throw;
             }            
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateDevice([Bind("SerialNumber,Status,StartDate,EndDate")] DeviceViewModel device)
+        {
+            if (ModelState.IsValid)
+            {
+                _entitiesTimeLine.CreateDevice(device);
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(device);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

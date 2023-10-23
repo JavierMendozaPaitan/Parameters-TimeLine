@@ -10,5 +10,6 @@ namespace TimeLine.Abstractions
     public interface IDeviceTimeLineAction
     {
         DeviceTimeLineViewModel GetDeviceTimeLine();
+        void CreateDevice(DeviceViewModel device);
     }
 }

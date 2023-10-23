@@ -1,4 +1,6 @@
-﻿using DataProvider.Models.Enums;
+﻿using DataProvider.Abstractions;
+using DataProvider.Models.Contoso;
+using DataProvider.Models.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,16 +17,40 @@ namespace TimeLine.Actions
     {
         private readonly ILogger<DeviceTimeLineAction> _logger;
         private readonly IJsonSerialization _jsonSerialization;
+        private readonly IDeviceRepository _deviceRepository;
 
         public DeviceTimeLineAction(
             ILogger<DeviceTimeLineAction> logger,
-            IJsonSerialization jsonSerialization
+            IJsonSerialization jsonSerialization,
+            IDeviceRepository deviceRepository
             )
         {
             _logger = logger;
             _jsonSerialization = jsonSerialization;
+            _deviceRepository = deviceRepository;
         }
-        public DeviceTimeLineViewModel GetDeviceTimeLine()
+
+		public void CreateDevice(DeviceViewModel device)
+		{
+			try
+			{
+                var deviceRepository = new Device
+				{
+                    SerialNumber = device.SerialNumber,
+                    Status = device.Status,
+                    StartDate = device.StartDate,
+                    EndDate = device.EndDate
+				};
+                _deviceRepository.InsertDevice(deviceRepository);
+			}
+			catch (Exception ex)
+            {
+                _logger.LogError($"Problems creating device: {ex.Message}", ex.StackTrace);
+                throw;
+            }
+		}
+
+		public DeviceTimeLineViewModel GetDeviceTimeLine()
         {
             try
             {
@@ -32,33 +58,19 @@ namespace TimeLine.Actions
                 {
                     DeviceTimeLine = new List<DeviceViewModel>()
                 };
-                viewModel.DeviceTimeLine.Add(new DeviceViewModel
-                {
-                    SerialNumber = "MT12344",
-                    Status = DeviceStatus.Unknown,
-                    StartDate = DateTime.Now.AddDays(-4),
-                    EndDate = DateTime.Now.AddDays(-2),
-                    StartDateString = DateTime.Now.AddDays(-4).ToString("yyyy-MM-ddTHH:mm:ss"),
-                    EndDateString = DateTime.Now.AddDays(-2).ToString("yyyy-MM-ddTHH:mm:ss")
-                });
-                viewModel.DeviceTimeLine.Add(new DeviceViewModel
-                {
-                    SerialNumber = "MT12344",
-                    Status = DeviceStatus.Active,
-                    StartDate = DateTime.Now.AddDays(-2),
-                    EndDate = DateTime.Now.AddDays(-1),
-                    StartDateString = DateTime.Now.AddDays(-2).ToString("yyyy-MM-ddTHH:mm:ss"),
-                    EndDateString = DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ss")
-                }) ;
-                viewModel.DeviceTimeLine.Add(new DeviceViewModel
-                {
-                    SerialNumber = "MT12344",
-                    Status = DeviceStatus.DueBack,
-                    StartDate = DateTime.Now.AddDays(-1),
-                    EndDate = DateTime.Now,
-                    StartDateString = DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ss"),
-                    EndDateString = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")
-                });
+                var devices = _deviceRepository.GetDevices();
+				foreach (var device in devices)
+				{
+                    viewModel.DeviceTimeLine.Add(new DeviceViewModel
+					{
+                        SerialNumber = device.SerialNumber,
+                        Status = device.Status,
+                        StartDate = device.StartDate,
+                        EndDate = device.EndDate,
+                        StartDateString = device.StartDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        EndDateString = device.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")
+					});
+				}
                 viewModel.SerializedData = _jsonSerialization.Serialize(viewModel.DeviceTimeLine);
 
                 return viewModel;
